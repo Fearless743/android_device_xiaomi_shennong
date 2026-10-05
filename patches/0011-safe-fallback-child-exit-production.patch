@@ -1,0 +1,12 @@
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -2347,7 +2347,7 @@ int TWPartitionManager::Decrypt_Device(string Password, int user_id) {
+ 		// Child process
+ 		char cPassword[255];
+ 		strcpy(cPassword, Password.c_str());
+-		exit(0);
++		_exit(0);
+ 	} else {
+ 		// Parent
+ 		int status;

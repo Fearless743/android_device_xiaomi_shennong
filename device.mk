@@ -33,3 +33,17 @@ PRODUCT_PACKAGES += \
     update_engine \
     update_verifier \
     update_engine_sideload
+
+# Decryption (QCOM FBE, Android 17)
+# vendor/twrp/common.mk 在新版 TWRP 会自动拉入 qcom_decrypt*,
+# 这里显式声明以兼容 omni common.mk (当前 omni_shennong.mk 用的是 vendor/omni)
+PRODUCT_PACKAGES += \
+    qcom_decrypt \
+    qcom_decrypt_fbe
+
+# Shipping / VNDK - 解密 HAL 需要的版本对齐 (SM8650 pineapple, A14-A17 通用)
+PRODUCT_SHIPPING_API_LEVEL := 32
+PRODUCT_TARGET_VNDK_VERSION := 34
+
+# 引入 extract-files.sh 提取的 A17 解密 blobs (若不存在则跳过, 兼容 minimal manifest 预置 blobs 方式)
+$(call inherit-product-if-exists, vendor/xiaomi/shennong/shennong-vendor.mk)

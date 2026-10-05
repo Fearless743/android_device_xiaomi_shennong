@@ -1,0 +1,75 @@
+name: Build TWRP shennong A17-decrypt
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Maximize Build Space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 2048
+        temp-reserve-mb: 2048
+        swap-size-mb: 16384
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        remove-docker-images: 'true'
+
+    - name: Checkout device tree
+      uses: actions/checkout@v4
+      with:
+        path: device-tree
+
+    - name: Prepare Environment
+      run: |
+        sudo apt update
+        sudo apt -y install git aria2 repo python3
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+    - name: Init Repo (minimal TWRP, twrp-14)
+      run: |
+        mkdir workspace && cd workspace
+        repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-14
+
+    - name: Repo Sync
+      run: |
+        cd workspace
+        repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+
+    - name: Copy device tree
+      run: |
+        cp -r device-tree workspace/device/xiaomi/shennong
+
+    - name: Apply A17 decrypt patches (Pixel8Pro PBRP port)
+      run: |
+        cd workspace
+        for p in device/xiaomi/shennong/patches/000*.patch; do
+          case "$p" in
+            *0001*|*0002*|*0007*|*0008*|*0010*|*0011*) root=bootable/recovery;;
+            *0003*|*0004*|*0009*) root=system/security;;
+            *0006*|*0012*) root=system/vold;;
+            *0005*) root=hardware/interfaces/security;;
+            *) root=.;;
+          esac
+          echo "== $p -> $root =="
+          (cd "$root" && git apply --check "../../device/xiaomi/shennong/$p" && git apply -v "../../device/xiaomi/shennong/$p")
+        done
+        cp device/xiaomi/shennong/source-overlays/system/vold/Weaver1.* system/vold/ || true
+
+    - name: Building recoveryimage
+      run: |
+        cd workspace
+        source build/envsetup.sh
+        lunch omni_shennong-eng
+        mka recoveryimage -j$(nproc --all)
+
+    - name: Upload recovery.img
+      uses: actions/upload-artifact@v4
+      with:
+        name: shennong_twrp-A17decrypt
+        path: workspace/out/target/product/shennong/recovery.img

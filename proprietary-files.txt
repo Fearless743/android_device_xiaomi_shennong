@@ -1,0 +1,69 @@
+# shennong - QCOM FBE 解密所需 vendor blobs (从 Android 17 原厂包提取)
+# 用法: ./extract-files.sh <HyperOS A17 的 system/vendor 镜像目录 或 adb>
+# 参考同 SoC 机型 houji (小米14) 已验证解密的 blob 集合整理,
+# shennong 与 houji 同为 pineapple (SM8650), 可直接复用.
+#
+# 注意: A17 上 KeyMint/Weaver 的 NDK 版本可能从 V3/V2 升级到 V4,
+# extract 时若提示某条缺失, 请用下面命令从真机查找实际文件名后替换:
+#   adb shell "ls /vendor/lib64/android.hardware.security.* /vendor/lib64/android.hardware.gatekeeper* /vendor/lib64/android.hardware.weaver*"
+
+# -- qseecom / gatekeeper / keymint / weaver 服务二进制 --
+vendor/bin/qseecomd
+vendor/bin/hw/android.hardware.gatekeeper-service-qti
+vendor/bin/hw/android.hardware.security.keymint-service-qti
+vendor/bin/hw/android.hardware.security.keymint-service.strongbox-nxp
+vendor/bin/hw/android.hardware.weaver-service.nxp
+vendor/bin/hw/android.hardware.secure_element-service.qti
+
+# -- keymaster / gatekeeper / keymint 核心依赖 --
+vendor/lib64/libQSEEComAPI.so
+vendor/lib64/libdrmfs.so
+vendor/lib64/libdrm.so
+vendor/lib64/libdrmtime.so
+vendor/lib64/libqtikeymaster4.so
+vendor/lib64/libqtikeymint.so
+vendor/lib64/libkeymaster_messages.so
+vendor/lib64/libkeymaster_portable.so
+vendor/lib64/libkeymasterdeviceutils.so
+vendor/lib64/libkeymasterprovision.so
+vendor/lib64/libkeymasterutils.so
+vendor/lib64/libqtigatekeeper.so
+vendor/lib64/librpmb.so
+vendor/lib64/libssd.so
+vendor/lib64/libspcom.so
+vendor/lib64/libspl.so
+vendor/lib64/libdiag.so
+vendor/lib64/libtime_genoff.so
+vendor/lib64/libqisl.so
+
+# -- AIDL NDK 封装 (A14 为 V3/V2, A17 若为 V4 请按真机实际文件名调整) --
+vendor/lib64/android.hardware.gatekeeper-V1-ndk.so
+vendor/lib64/android.hardware.security.keymint-V3-ndk.so
+vendor/lib64/android.hardware.security.rkp-V3-ndk.so
+vendor/lib64/android.hardware.security.secureclock-V1-ndk.so
+vendor/lib64/android.hardware.security.sharedsecret-V1-ndk.so
+vendor/lib64/android.hardware.weaver-V2-ndk.so
+vendor/lib64/android.hardware.secure_element-V1-ndk.so
+vendor/lib64/android.hardware.secure_element@1.0.so
+vendor/lib64/android.hardware.secure_element@1.1.so
+vendor/lib64/android.hardware.secure_element@1.2.so
+vendor/lib64/android.se.omapi-V1-ndk.so
+
+# -- NXP strongbox / eSE (小米 pineapple 机型标配, 缺失则 PIN 解密失败) --
+vendor/lib64/libjc_keymint_nxp.so
+vendor/lib64/libjc_keymint_transport_nxp.so
+vendor/lib64/ese_weaver.so
+vendor/lib64/libEseUtils.so
+vendor/lib64/libGPQeSE.so
+vendor/lib64/libGPTEE_vendor.so
+vendor/lib64/libGPreqcancel.so
+vendor/lib64/libGPreqcancel_svc.so
+vendor/lib64/libqcbor.so
+
+# -- 通用 NDK / 堆 / 描述符 --
+vendor/lib64/libminkdescriptor.so
+vendor/lib64/libvmmem.so
+vendor/lib64/libsoc_helper.so
+vendor/lib64/libops.so
+vendor/lib64/libmisight.so
+vendor/lib64/libmemunreachable.so

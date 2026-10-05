@@ -1,0 +1,67 @@
+diff --git a/Android.mk b/Android.mk
+index 8aa6e09..c0f175b 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -474,4 +474,8 @@ ifeq ($(TW_FORCE_KEYMASTER_VER), true)
+     LOCAL_CFLAGS += -DTW_FORCE_KEYMASTER_VER
+ endif
+ 
++ifeq ($(TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO), true)
++    LOCAL_CFLAGS += -DTW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
++endif
++
+ LOCAL_C_INCLUDES += system/vold \
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+index 544f3c1..4023c79 100644
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -241,7 +241,9 @@ void inline Process_Keymaster_Version(TWPartition *ven, bool Display_Error) {
+ 		*/
+ 	if (version.empty()) {
+ 		// unmount partition(s)
++#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
+ 		if (ven) ven->UnMount(Display_Error);
++#endif
+ 
+ 		// Use keymaster_ver prop set from device tree (if exists)
+ 		version = android::base::GetProperty(TW_KEYMASTER_VERSION_PROP, version);
+@@ -254,10 +256,14 @@ void inline Process_Keymaster_Version(TWPartition *ven, bool Display_Error) {
+ 			LOGINFO("Keymaster_Ver::Unable to find vendor manifest on the device. Setting to default value.\n");
+ 		}
+ 	} else {
++#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
+ 		if (ven) ven->UnMount(Display_Error);
++#endif
+ 	}
+ #else
++#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
+ 	if (ven) ven->UnMount(Display_Error);
++#endif
+ 
+ 	version = android::base::GetProperty(TW_KEYMASTER_VERSION_PROP, version);
+ 	if (version.empty()) {
+@@ -419,7 +425,14 @@ clear:
+ 	TWPartition* ven = PartitionManager.Find_Partition_By_Path("/vendor");
+ 	TWPartition* odm = PartitionManager.Find_Partition_By_Path("/odm");
+ 	if (recovery_mode && !parse_userdata) {
+-		if (ven) ven->Mount(Display_Error);
++		if (ven) {
++			bool vendor_mounted = ven->Mount(Display_Error);
++#ifdef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
++			if (vendor_mounted) {
++				property_set("twrp.vendor.mounted", "1");
++			}
++#endif
++		}
+ 		if (odm) odm->Mount(Display_Error);
+ 
+ 		Process_ResetProps(ven, odm);
+@@ -440,6 +453,8 @@ clear:
+ 	if (recovery_mode)
+ 		Process_Keymaster_Version(ven, false);
++#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
+ 	if (ven) ven->UnMount(Display_Error);
++#endif
+ 	return true;
+ }
+ 
