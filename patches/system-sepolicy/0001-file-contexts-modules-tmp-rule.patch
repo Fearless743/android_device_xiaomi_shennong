@@ -1,0 +1,17 @@
+diff --git a/Android.mk b/Android.mk
+index 618f7f0..46581e7 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -606,6 +606,12 @@ $(call merge-fc-files,$(local_fc_files),$(file_contexts.local.tmp))
+ # it gathers LOCAL_FILE_CONTEXTS from product_MODULES
+ file_contexts.modules.tmp := $(intermediates)/file_contexts.modules.tmp
+ 
++# TWRP minimal manifest: build/make 未定义 file_contexts.modules.tmp 的规则,
++# 且无 product system_ext 模块通过 LOCAL_FILE_CONTEXTS 注入, 生成空文件即可.
++$(file_contexts.modules.tmp):
++	@mkdir -p $(dir $@)
++	$(hide) : > $@
++
+ device_fc_files := $(call build_vendor_policy, file_contexts)
+ 
+ ifdef BOARD_ODM_SEPOLICY_DIRS

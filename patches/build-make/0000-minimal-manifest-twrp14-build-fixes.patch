@@ -23,6 +23,19 @@ index d51de33..10fbe8f 100644
  
  ifdef TARGET_ARCH
    $(call add_json_map,  CpuVariant)
+diff --git a/core/main.mk b/core/main.mk
+index c1cafc0..a43b32e 100644
+--- a/core/main.mk
++++ b/core/main.mk
+@@ -44,7 +44,7 @@ BUILD_NUMBER_FILE := $(SOONG_OUT_DIR)/build_number.txt
+ $(KATI_obsolete_var BUILD_NUMBER,See https://android.googlesource.com/platform/build/+/master/Changes.md#BUILD_NUMBER)
+ BUILD_HOSTNAME_FILE := $(SOONG_OUT_DIR)/build_hostname.txt
+ $(KATI_obsolete_var BUILD_HOSTNAME,Use BUILD_HOSTNAME_FROM_FILE instead)
+-$(KATI_obsolete_var FILE_NAME_TAG,https://android.googlesource.com/platform/build/+/master/Changes.md#FILE_NAME_TAG)
++# TWRP minimal: FILE_NAME_TAG 仍被 development/build sdk_repo 引用, 取消废弃标记
+ 
+ $(BUILD_NUMBER_FILE):
+ 	# empty rule to prevent dangling rule error for a file that is written by soong_ui
 diff --git a/core/release_config.mk b/core/release_config.mk
 index 8d19bc7..39dc034 100644
 --- a/core/release_config.mk
@@ -64,6 +77,28 @@ index 1cbcee9..9c0c087 100644
  else
  $(error AFDO_PROFILES can only be set from soong_config.mk. For product-specific fdo_profiles, please use PRODUCT_AFDO_PROFILES)
  endif
+diff --git a/core/tasks/cts.mk b/core/tasks/cts.mk
+index 2e2ea79..b07dedd 100644
+--- a/core/tasks/cts.mk
++++ b/core/tasks/cts.mk
+@@ -49,7 +49,7 @@ ifneq (,$(wildcard cts/))
+         has changed and a new version must be added to this CTS file.
+         ============================================================
+       endef
+-      $(error $(error_msg))
++      $(warning TWRP-minimal: $(error_msg))
+     endif
+   endif
+   ifeq (,$(findstring $(PLATFORM_VERSION_LAST_STABLE),$(cts_platform_release_string)))
+@@ -61,7 +61,7 @@ ifneq (,$(wildcard cts/))
+       has changed and a new version must be added to this CTS file.
+       ============================================================
+     endef
+-    $(error $(error_msg))
++    $(warning TWRP-minimal: $(error_msg))
+   endif
+ endif
+ 
 diff --git a/target/product/gsi/Android.bp b/target/product/gsi/Android.bp
 index 45ba143..e940471 100644
 --- a/target/product/gsi/Android.bp
