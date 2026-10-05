@@ -130,3 +130,6 @@ TARGET_USES_MKE2FS := true
 
 # TWRP board configs (Soong 变量导出等, 缺了会报 TW_THEME: not set)
 -include vendor/twrp/config/BoardConfigTWRP.mk
+
+# minimal 源存在重复规则 (fontchain_lint 等)
+BUILD_BROKEN_DUP_RULES := true
