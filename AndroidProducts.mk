@@ -9,6 +9,4 @@ PRODUCT_MAKEFILES := \
     $(LOCAL_DIR)/omni_shennong.mk
 
 COMMON_LUNCH_CHOICES := \
-    omni_shennong-user \
-    omni_shennong-userdebug \
-    omni_shennong-eng
+    omni_shennong-trunk_staging-eng

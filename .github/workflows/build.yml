@@ -65,7 +65,7 @@ jobs:
       run: |
         cd workspace
         source build/envsetup.sh
-        lunch omni_shennong-eng
+        lunch omni_shennong-trunk_staging-eng
         mka recoveryimage -j$(nproc --all)
 
     - name: Upload recovery.img
