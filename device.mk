@@ -13,12 +13,10 @@ AB_OTA_POSTINSTALL_CONFIG += \
     FILESYSTEM_TYPE_system=ext4 \
     POSTINSTALL_OPTIONAL_system=true
 
-# Boot control HAL (A14: static HAL 已废弃, 用 shared + .recovery 变体)
-# 注意: android.hardware.boot@1.0-service 必须保留在 PRODUCT_PACKAGES,
-# 否则 soong 不会生成其 vendor/etc/init rc, TWRP relink_binaries 会缺依赖
+# Boot control HAL: 用 QTI AIDL 服务 + xiaomi bootctrl.
+# 不要引入 AOSP HIDL android.hardware.boot@1.x-service: 本树 soong 不安装
+# vendor/etc/init 下的 init_rc, TWRP 的 relink 会因缺该 rc 报错.
 PRODUCT_PACKAGES += \
-    android.hardware.boot@1.0-impl \
-    android.hardware.boot@1.0-service \
     android.hardware.boot@1.2-impl-qti \
     android.hardware.boot@1.2-impl-qti.recovery \
     bootctrl.xiaomi_sm8650 \
