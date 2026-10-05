@@ -1,7 +1,8 @@
 diff --git a/weaver/aidl/Android.bp b/weaver/aidl/Android.bp
+index 38d017f..49d7ecd 100644
 --- a/weaver/aidl/Android.bp
 +++ b/weaver/aidl/Android.bp
-@@ -9,6 +9,7 @@ package {
+@@ -10,6 +10,7 @@ package {
  aidl_interface {
      name: "android.hardware.weaver",
      vendor_available: true,

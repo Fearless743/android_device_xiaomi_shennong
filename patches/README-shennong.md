@@ -5,6 +5,11 @@
 
 ## 能直接复用的通用补丁 (已放入 `patches/`, 按原编号顺序打)
 
+**twrp-14 适配说明**: 0001/0002 已按 twrp-14 的 `partitionmanager.cpp` 重写;
+0005 目标改为 `hardware/interfaces/weaver/aidl` (AOSP 真实路径);
+0006 已删除 (twrp-14 的 vold 无 weaver 链接点, houji 同方案已验证可解);
+0007/0008/0010/0011 合并为 `0007-recovery-twrp14-crypto-links-metadata.patch` (twrp-14 上下文版)。
+
 | 补丁 | 目标源码 | 作用, 为何 shennong 也需要 |
 |---|---|---|
 | 0001+0002 | `bootable/recovery` | 解密期间保持 `/vendor` 挂载 (`TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO`), AIDL HAL 不掉线; BoardConfig 已加该 flag |

@@ -53,7 +53,7 @@ jobs:
             *0001*|*0002*|*0007*|*0008*|*0010*|*0011*) root=bootable/recovery;;
             *0003*|*0004*|*0009*) root=system/security;;
             *0006*|*0012*) root=system/vold;;
-            *0005*) root=hardware/interfaces/security;;
+            *0005*) root=hardware/interfaces/weaver;;
             *) root=.;;
           esac
           echo "== $p -> $root =="
