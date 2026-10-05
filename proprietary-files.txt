@@ -1,21 +1,26 @@
-# shennong - QCOM FBE 解密所需 vendor blobs (从 Android 17 原厂包提取)
-# 用法: ./extract-files.sh <HyperOS A17 的 system/vendor 镜像目录 或 adb>
-# 参考同 SoC 机型 houji (小米14) 已验证解密的 blob 集合整理,
-# shennong 与 houji 同为 pineapple (SM8650), 可直接复用.
+# shennong - QCOM FBE 解密所需 blobs (已从 Android 17 原厂包提取到 recovery/root/)
+# super 来源: P-shennong-ota_images-v4.0.25-OS4.0.0.12.XNBCNXM-user-17.0 (super.img)
+# 提取方式见 /home/fearless/twrp-blobs/pull-blobs.sh (lpunpack + erofsfuse, 无需 root/loop)
 #
-# 注意: A17 上 KeyMint/Weaver 的 NDK 版本可能从 V3/V2 升级到 V4,
-# extract 时若提示某条缺失, 请用下面命令从真机查找实际文件名后替换:
-#   adb shell "ls /vendor/lib64/android.hardware.security.* /vendor/lib64/android.hardware.gatekeeper* /vendor/lib64/android.hardware.weaver*"
+# A17 重要变化 (相对 A14 houji):
+# - KeyMint HAL 为 v4 (vendor/lib64/android.hardware.keymaster-V4-ndk.so), 必须配合 patches/0009
+# - NXP strongbox/weaver 移到 odm 分区, 已按 houji 布局收拢进 recovery ramdisk 的 /vendor 路径,
+#   对应 rc 已改写为 root 用户 + /vendor 路径 (原 odm rc 用 /odm 路径 + vendor_nxp_* 用户, recovery 下起不来)
+# - A17 无 libqtigatekeeper.so (改走 lib64/hw/libqtigatekeeper.so), 无 libjc_keymint_nxp
+#   (改名 libjc_keymint3.nxp.so, 在 odm), 无 ese_weaver 上层以外的 libEseUtils (在 vendor lib64/hw)
 
-# -- qseecom / gatekeeper / keymint / weaver 服务二进制 --
+# -- 服务二进制 (vendor) --
 vendor/bin/qseecomd
 vendor/bin/hw/android.hardware.gatekeeper-service-qti
 vendor/bin/hw/android.hardware.security.keymint-service-qti
-vendor/bin/hw/android.hardware.security.keymint-service.strongbox-nxp
-vendor/bin/hw/android.hardware.weaver-service.nxp
 vendor/bin/hw/android.hardware.secure_element-service.qti
+vendor/bin/hw/android.hardware.keymaster@4.0-service-qti
+vendor/bin/hw/vendor.qti.hardware.qseecom@1.0-service
+# -- 服务二进制 (odm, ramdisk 内仍放 /vendor/bin/hw) --
+odm/bin/hw/android.hardware.security.keymint-service.strongbox-nxp
+odm/bin/hw/android.hardware.weaver-service.nxp-qti
 
-# -- keymaster / gatekeeper / keymint 核心依赖 --
+# -- vendor/lib64 (全量, 含 KeyMint v4 NDK) --
 vendor/lib64/libQSEEComAPI.so
 vendor/lib64/libdrmfs.so
 vendor/lib64/libdrm.so
@@ -27,17 +32,34 @@ vendor/lib64/libkeymaster_portable.so
 vendor/lib64/libkeymasterdeviceutils.so
 vendor/lib64/libkeymasterprovision.so
 vendor/lib64/libkeymasterutils.so
-vendor/lib64/libqtigatekeeper.so
 vendor/lib64/librpmb.so
 vendor/lib64/libssd.so
 vendor/lib64/libspcom.so
 vendor/lib64/libspl.so
+vendor/lib64/libsplh.so
 vendor/lib64/libdiag.so
 vendor/lib64/libtime_genoff.so
 vendor/lib64/libqisl.so
-
-# -- AIDL NDK 封装 (A14 为 V3/V2, A17 若为 V4 请按真机实际文件名调整) --
+vendor/lib64/libqcbor.so
+vendor/lib64/libcppbor_external.so
+vendor/lib64/libstnfc-streset.so
+vendor/lib64/libminkdescriptor.so
+vendor/lib64/libvmmem.so
+vendor/lib64/libsoc_helper.so
+vendor/lib64/libops.so
+vendor/lib64/libmisight.so
+vendor/lib64/libmemunreachable.so
+vendor/lib64/lib_android_keymaster_keymint_utils.so
+vendor/lib64/libcppcose_rkp.so
 vendor/lib64/android.hardware.gatekeeper-V1-ndk.so
+vendor/lib64/android.hardware.gatekeeper@1.0.so
+vendor/lib64/android.hardware.keymaster-V3-ndk.so
+vendor/lib64/android.hardware.keymaster-V4-ndk.so
+vendor/lib64/android.hardware.keymaster@3.0.so
+vendor/lib64/android.hardware.keymaster@4.0.so
+vendor/lib64/android.hardware.keymaster@4.1.so
+vendor/lib64/android.hardware.security.keymint-V1-ndk.so
+vendor/lib64/android.hardware.security.keymint-V2-ndk.so
 vendor/lib64/android.hardware.security.keymint-V3-ndk.so
 vendor/lib64/android.hardware.security.rkp-V3-ndk.so
 vendor/lib64/android.hardware.security.secureclock-V1-ndk.so
@@ -48,22 +70,19 @@ vendor/lib64/android.hardware.secure_element@1.0.so
 vendor/lib64/android.hardware.secure_element@1.1.so
 vendor/lib64/android.hardware.secure_element@1.2.so
 vendor/lib64/android.se.omapi-V1-ndk.so
-
-# -- NXP strongbox / eSE (小米 pineapple 机型标配, 缺失则 PIN 解密失败) --
-vendor/lib64/libjc_keymint_nxp.so
-vendor/lib64/libjc_keymint_transport_nxp.so
-vendor/lib64/ese_weaver.so
-vendor/lib64/libEseUtils.so
 vendor/lib64/libGPQeSE.so
 vendor/lib64/libGPTEE_vendor.so
 vendor/lib64/libGPreqcancel.so
 vendor/lib64/libGPreqcancel_svc.so
-vendor/lib64/libqcbor.so
-
-# -- 通用 NDK / 堆 / 描述符 --
-vendor/lib64/libminkdescriptor.so
-vendor/lib64/libvmmem.so
-vendor/lib64/libsoc_helper.so
-vendor/lib64/libops.so
-vendor/lib64/libmisight.so
-vendor/lib64/libmemunreachable.so
+vendor/lib64/vendor.qti.hardware.qseecom-V1-ndk.so
+vendor/lib64/vendor.qti.hardware.qseecom@1.0.so
+vendor/lib64/hw/libqtigatekeeper.so
+vendor/lib64/hw/libEseUtils.so
+vendor/lib64/hw/vendor.qti.hardware.qseecom@1.0-impl.so
+# -- odm/lib64 (NXP eSE / strongbox, ramdisk 内仍放 /vendor/lib64) --
+odm/lib64/ese_weaver.so
+odm/lib64/libweaver_empty-nxp.so
+odm/lib64/libjc_keymint3.nxp.so
+odm/lib64/libjc_keymint_transport.nxp.so
+odm/lib64/libkeymint_empty-nxp.so
+odm/lib64/libkeymint_transport_empty-nxp.so

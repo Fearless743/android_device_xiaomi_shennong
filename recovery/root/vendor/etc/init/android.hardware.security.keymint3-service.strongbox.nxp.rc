@@ -1,0 +1,7 @@
+# Adapted for TWRP recovery from odm/etc/init/android.hardware.security.keymint3-service.strongbox.nxp.rc:
+# odm blobs staged under /vendor in ramdisk, stock users do not exist in recovery -> run as root.
+service vendor.keymint-strongbox /vendor/bin/hw/android.hardware.security.keymint-service.strongbox-nxp
+    class early_hal
+    user root
+    group root drmrpc
+    seclabel u:r:recovery:s0

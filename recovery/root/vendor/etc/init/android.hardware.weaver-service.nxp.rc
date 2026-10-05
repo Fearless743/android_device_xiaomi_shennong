@@ -1,0 +1,8 @@
+# Adapted for TWRP recovery from odm/etc/init/android.hardware.weaver-service.nxp.rc:
+# odm blobs staged under /vendor in ramdisk, stock users (vendor_nxp_weaver)
+# do not exist in recovery -> run as root.
+service vendor.weaver_nxp /vendor/bin/hw/android.hardware.weaver-service.nxp-qti
+    class hal
+    user root
+    group root drmrpc
+    seclabel u:r:recovery:s0
