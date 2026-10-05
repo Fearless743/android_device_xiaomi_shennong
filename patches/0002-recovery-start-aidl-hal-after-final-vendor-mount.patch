@@ -1,55 +1,40 @@
 diff --git a/partitionmanager.cpp b/partitionmanager.cpp
-index 4023c79..80f9fab 100644
+index ca7e232..3c4a77f 100755
 --- a/partitionmanager.cpp
 +++ b/partitionmanager.cpp
-@@ -417,14 +417,7 @@ clear:
- 	TWPartition* ven = PartitionManager.Find_Partition_By_Path("/vendor");
- 	TWPartition* odm = PartitionManager.Find_Partition_By_Path("/odm");
- 	if (recovery_mode && !parse_userdata) {
--		if (ven) {
--			bool vendor_mounted = ven->Mount(Display_Error);
--#ifdef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
--			if (vendor_mounted) {
--				property_set("twrp.vendor.mounted", "1");
--			}
--#endif
--		}
-+		if (ven) ven->Mount(Display_Error);
- 		if (odm) odm->Mount(Display_Error);
- 
- 		Process_ResetProps(ven, odm);
-@@ -509,7 +502,9 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
+@@ -494,8 +494,10 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
+ 			}
  		}
- 	}
- #ifndef USE_VENDOR_LIBS
+ 	#ifndef USE_VENDOR_LIBS
 +#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 	if (ven) ven->UnMount(Display_Error);
+ 		if (ven)
+ 			ven->UnMount(Display_Error);
 +#endif
- 	if (sys) sys->UnMount(Display_Error);
- #endif
- 
-@@ -556,6 +551,14 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
- 		Setup_Settings_Storage_Partition(settings_partition);
- 	}
+ 		if (sys)
+ 			sys->UnMount(Display_Error);
+ 	#endif
+@@ -539,6 +541,14 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
+ 			Setup_Settings_Storage_Partition(settings_partition);
+ 		}
  
 +#ifdef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
-+	if (ven && !ven->Is_Mounted()) ven->Mount(Display_Error);
-+	if (ven && ven->Is_Mounted()) {
-+		property_set("twrp.vendor.mounted", "1");
-+	} else {
-+		LOGERR("Unable to mount vendor for crypto HAL services\n");
-+	}
++		if (ven && !ven->Is_Mounted()) ven->Mount(Display_Error);
++		if (ven && ven->Is_Mounted()) {
++			property_set("twrp.vendor.mounted", "1");
++		} else {
++			LOGERR("Unable to mount vendor for crypto HAL services\n");
++		}
 +#endif
- #ifdef TW_INCLUDE_CRYPTO
- 	DataManager::SetValue(TW_IS_ENCRYPTED, 1);
- 	Decrypt_Data();
-@@ -2495,7 +2498,9 @@ void TWPartitionManager::UnMount_Main_Partitions(void) {
+ 	#ifdef TW_INCLUDE_CRYPTO
+ 		DataManager::SetValue(TW_IS_ENCRYPTED, 1);
+ 		Decrypt_Data();
+@@ -2388,7 +2398,9 @@ void TWPartitionManager::UnMount_Main_Partitions(void) {
  
- 	TWPartition* Partition = Find_Partition_By_Path("/vendor");
+ 	TWPartition *Partition = Find_Partition_By_Path ("/vendor");
  
 +#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
  	if (Partition != NULL) UnMount_By_Path("/vendor", false);
 +#endif
- 	UnMount_By_Path(Get_Android_Root_Path(), true);
- 	Partition = Find_Partition_By_Path("/product");
+ 	UnMount_By_Path (Get_Android_Root_Path(), true);
+ 	Partition = Find_Partition_By_Path ("/product");
  	if (Partition != NULL) UnMount_By_Path("/product", false);

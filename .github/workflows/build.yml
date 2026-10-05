@@ -57,7 +57,7 @@ jobs:
             *) root=.;;
           esac
           echo "== $p -> $root =="
-          (cd "$root" && git apply --check "../../device/xiaomi/shennong/$p" && git apply -v "../../device/xiaomi/shennong/$p")
+          (cd "$root" && git apply --check "../../$p" && git apply -v "../../$p")
         done
         cp device/xiaomi/shennong/source-overlays/system/vold/Weaver1.* system/vold/ || true
 
