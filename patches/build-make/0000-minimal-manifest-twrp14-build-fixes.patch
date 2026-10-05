@@ -1,0 +1,46 @@
+diff --git a/core/config.mk b/core/config.mk
+index 6ed09dd..1d4d7f0 100644
+--- a/core/config.mk
++++ b/core/config.mk
+@@ -377,6 +377,7 @@ endif
+ # ---------------------------------------------------------------
+ # Define most of the global variables.  These are the ones that
+ # are specific to the user's build configuration.
++include $(BUILD_SYSTEM)/version_defaults.mk
+ include $(BUILD_SYSTEM)/envsetup.mk
+ 
+ 
+diff --git a/core/release_config.mk b/core/release_config.mk
+index 8d19bc7..39dc034 100644
+--- a/core/release_config.mk
++++ b/core/release_config.mk
+@@ -211,6 +211,10 @@ applied_releases:=
+ # _flag_declaration_files is the combined list of FLAG_DECLARATION_FILES set by
+ # release_config_map.mk files above.
+ 
++# TWRP minimal manifest has no aconfig flags and no starlark libs: skip the
++# starlark evaluation entirely when there is nothing to evaluate.
++ifeq ($(strip $(_flag_declaration_files)),)
++else
+ # Because starlark can't find files with $(wildcard), write an entrypoint starlark script that
+ # contains the result of the above wildcards for the starlark code to use.
+ filename_to_starlark=$(subst /,_,$(subst .,_,$(1)))
+@@ -235,4 +239,5 @@ filename_to_starlark:=
+ # We also need to pass --allow_external_entrypoint to rbcrun in case the OUT_DIR is set to something
+ # outside of the source tree.
+ $(call run-starlark,$(OUT_DIR)/release_config_entrypoint.scl,$(OUT_DIR)/release_config_entrypoint.scl,--allow_external_entrypoint)
++endif
+ 
+diff --git a/core/soong_config.mk b/core/soong_config.mk
+index 1cbcee9..62f2e3d 100644
+--- a/core/soong_config.mk
++++ b/core/soong_config.mk
+@@ -8,7 +8,7 @@ include $(BUILD_SYSTEM)/dex_preopt_config.mk
+ ifndef AFDO_PROFILES
+ # Set AFDO_PROFILES
+ -include vendor/google_data/pgo_profile/sampling/afdo_profiles.mk
+-include toolchain/pgo-profiles/sampling/afdo_profiles.mk
++-include toolchain/pgo-profiles/sampling/afdo_profiles.mk
+ else
+ $(error AFDO_PROFILES can only be set from soong_config.mk. For product-specific fdo_profiles, please use PRODUCT_AFDO_PROFILES)
+ endif

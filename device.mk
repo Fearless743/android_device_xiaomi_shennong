@@ -13,19 +13,12 @@ AB_OTA_POSTINSTALL_CONFIG += \
     FILESYSTEM_TYPE_system=ext4 \
     POSTINSTALL_OPTIONAL_system=true
 
-# Boot control HAL
+# Boot control HAL (A14: static HAL 已废弃, 用 shared + .recovery 变体)
 PRODUCT_PACKAGES += \
-    android.hardware.boot@1.0-impl \
-    android.hardware.boot@1.0-service
-
-PRODUCT_PACKAGES += \
-    bootctrl.xiaomi_sm8650
-
-PRODUCT_STATIC_BOOT_CONTROL_HAL := \
+    android.hardware.boot@1.2-impl-qti \
+    android.hardware.boot@1.2-impl-qti.recovery \
     bootctrl.xiaomi_sm8650 \
-    libgptutils \
-    libz \
-    libcutils
+    bootctrl.xiaomi_sm8650.recovery
 
 PRODUCT_PACKAGES += \
     otapreopt_script \

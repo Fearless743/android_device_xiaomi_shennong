@@ -45,14 +45,14 @@ jobs:
       run: |
         cp -r device-tree workspace/device/xiaomi/shennong
 
-    - name: Apply A17 decrypt patches (Pixel8Pro PBRP port)
+    - name: Apply A17 decrypt patches (Pixel8Pro PBRP port, twrp-14 adapted)
       run: |
         cd workspace
         for p in device/xiaomi/shennong/patches/000*.patch; do
           case "$p" in
-            *0001*|*0002*|*0007*|*0008*|*0010*|*0011*) root=bootable/recovery;;
+            *0001*|*0002*|*0007*) root=bootable/recovery;;
             *0003*|*0004*|*0009*) root=system/security;;
-            *0006*|*0012*) root=system/vold;;
+            *0012*) root=system/vold;;
             *0005*) root=hardware/interfaces/weaver;;
             *) root=.;;
           esac
@@ -60,6 +60,8 @@ jobs:
           (cd "$root" && git apply --check "$GITHUB_WORKSPACE/workspace/$p" && git apply -v "$GITHUB_WORKSPACE/workspace/$p")
         done
         cp device/xiaomi/shennong/source-overlays/system/vold/Weaver1.* system/vold/ || true
+        cp -f device/xiaomi/shennong/build-hacks/version_defaults.mk build/make/core/version_defaults.mk
+        (cd build/make && git apply --check "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/build-make/0000-minimal-manifest-twrp14-build-fixes.patch" && git apply -v "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/build-make/0000-minimal-manifest-twrp14-build-fixes.patch")
 
     - name: Building recoveryimage
       run: |
