@@ -32,9 +32,16 @@ index 8d19bc7..39dc034 100644
 +endif
  
 diff --git a/core/soong_config.mk b/core/soong_config.mk
-index 1cbcee9..62f2e3d 100644
+index 1cbcee9..9c0c087 100644
 --- a/core/soong_config.mk
 +++ b/core/soong_config.mk
+@@ -1,5 +1,5 @@
+ SOONG_MAKEVARS_MK := $(SOONG_OUT_DIR)/make_vars-$(TARGET_PRODUCT).mk
+-SOONG_VARIABLES := $(SOONG_OUT_DIR)/soong.$(TARGET_PRODUCT).variables
++SOONG_VARIABLES := $(SOONG_OUT_DIR)/soong.variables
+ SOONG_ANDROID_MK := $(SOONG_OUT_DIR)/Android-$(TARGET_PRODUCT).mk
+ 
+ include $(BUILD_SYSTEM)/art_config.mk
 @@ -8,7 +8,7 @@ include $(BUILD_SYSTEM)/dex_preopt_config.mk
  ifndef AFDO_PROFILES
  # Set AFDO_PROFILES
