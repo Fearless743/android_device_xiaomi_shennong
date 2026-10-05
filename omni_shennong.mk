@@ -5,9 +5,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Inherit from those products. Most specific first.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
+# 极简继承 (对齐 houji 等可用的 SM8650 TWRP 树).
+# 不要用 full_base_telephony: 会拖入大量 vendor HIDL 服务,
+# 其 init_rc 在 minimal twrp-14 源里没有安装规则, 导致 ninja 缺依赖.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
+
+# Virtual A/B
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/compression.mk)
+
+# Emulated storage
+$(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
 # Inherit some common TWRP stuff.
 $(call inherit-product, vendor/twrp/config/common.mk)
@@ -17,6 +26,7 @@ $(call inherit-product, device/xiaomi/shennong/device.mk)
 
 PRODUCT_DEVICE := shennong
 PRODUCT_NAME := omni_shennong
+PRODUCT_RELEASE_NAME := shennong
 PRODUCT_BRAND := Xiaomi
 PRODUCT_MODEL := Xiaomi 14 Pro
 PRODUCT_MANUFACTURER := xiaomi

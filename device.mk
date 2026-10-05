@@ -42,3 +42,10 @@ PRODUCT_TARGET_VNDK_VERSION := 34
 
 # 引入 extract-files.sh 提取的 A17 解密 blobs (若不存在则跳过, 兼容 minimal manifest 预置 blobs 方式)
 $(call inherit-product-if-exists, vendor/xiaomi/shennong/shennong-vendor.mk)
+
+# Dynamic partitions
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
+
+# Soong namespaces
+PRODUCT_SOONG_NAMESPACES += \
+    $(LOCAL_PATH)
