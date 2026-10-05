@@ -127,3 +127,6 @@ TW_INCLUDE_RESETPROP := true
 TW_INCLUDE_LIBRESETPROP := true
 TW_INCLUDE_FASTBOOTD := true
 TARGET_USES_MKE2FS := true
+
+# TWRP board configs (Soong 变量导出等, 缺了会报 TW_THEME: not set)
+-include vendor/twrp/config/BoardConfigTWRP.mk
