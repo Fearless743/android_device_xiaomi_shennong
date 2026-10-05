@@ -44,3 +44,26 @@ index 1cbcee9..62f2e3d 100644
  else
  $(error AFDO_PROFILES can only be set from soong_config.mk. For product-specific fdo_profiles, please use PRODUCT_AFDO_PROFILES)
  endif
+diff --git a/tools/metadata/Android.bp b/tools/metadata/Android.bp
+index 77d106d..3acff96 100644
+--- a/tools/metadata/Android.bp
++++ b/tools/metadata/Android.bp
+@@ -2,15 +2,5 @@ package {
+     default_applicable_licenses: ["Android-Apache-2.0"],
+ }
+ 
+-blueprint_go_binary {
+-    name: "metadata",
+-    deps: [
+-            "soong-testing-test_spec_proto",
+-            "soong-testing-code_metadata_proto",
+-            "soong-testing-code_metadata_internal_proto",
+-            "golang-protobuf-proto",
+-        ],
+-    srcs: [
+-        "generator.go",
+-    ]
+-}
+\ No newline at end of file
++// TWRP minimal manifest lacks soong-testing-* protos; the SBOM metadata
++// host tool is not needed for recoveryimage, neuter it so soong parses.
