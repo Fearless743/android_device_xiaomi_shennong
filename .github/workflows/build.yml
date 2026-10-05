@@ -62,6 +62,7 @@ jobs:
         cp device/xiaomi/shennong/source-overlays/system/vold/Weaver1.* system/vold/ || true
         cp -f device/xiaomi/shennong/build-hacks/version_defaults.mk build/make/core/version_defaults.mk
         (cd build/make && git apply --check "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/build-make/0000-minimal-manifest-twrp14-build-fixes.patch" && git apply -v "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/build-make/0000-minimal-manifest-twrp14-build-fixes.patch")
+        (cd system/update_engine && git apply --check "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/system-update-engine/0001-soong-triage-assignee-fix.patch" && git apply -v "$GITHUB_WORKSPACE/workspace/device/xiaomi/shennong/patches/system-update-engine/0001-soong-triage-assignee-fix.patch")
 
     - name: Building recoveryimage
       run: |

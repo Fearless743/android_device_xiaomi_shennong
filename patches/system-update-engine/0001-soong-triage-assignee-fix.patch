@@ -1,0 +1,12 @@
+diff --git a/Android.bp b/Android.bp
+index 62afe09..521115f 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -1357,7 +1357,6 @@ cc_fuzz {
+         "aosp/metrics_reporter_android.cc",
+     ],
+     fuzz_config: {
+-        triage_assignee: "waghpawan@google.com",
+         cc: [
+             "elsk@google.com",
+             "zhangkelvin@google.com",
