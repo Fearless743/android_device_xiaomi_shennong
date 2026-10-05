@@ -10,6 +10,19 @@ index 6ed09dd..1d4d7f0 100644
  include $(BUILD_SYSTEM)/envsetup.mk
  
  
+diff --git a/core/dex_preopt_config.mk b/core/dex_preopt_config.mk
+index d51de33..10fbe8f 100644
+--- a/core/dex_preopt_config.mk
++++ b/core/dex_preopt_config.mk
+@@ -122,7 +122,7 @@ ifeq ($(WRITE_SOONG_VARIABLES),true)
+   $(call add_json_str,  Dex2oatXmx,                              $(DEX2OAT_XMX))
+   $(call add_json_str,  Dex2oatXms,                              $(DEX2OAT_XMS))
+   $(call add_json_str,  EmptyDirectory,                          $(OUT_DIR)/empty)
+-  $(call add_json_str,  EnableUffdGc,                            $(ENABLE_UFFD_GC))
++  $(call add_json_bool, EnableUffdGc,                            $(filter true,$(ENABLE_UFFD_GC)))
+ 
+ ifdef TARGET_ARCH
+   $(call add_json_map,  CpuVariant)
 diff --git a/core/release_config.mk b/core/release_config.mk
 index 8d19bc7..39dc034 100644
 --- a/core/release_config.mk
