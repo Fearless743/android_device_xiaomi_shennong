@@ -1,5 +1,5 @@
 diff --git a/Android.mk b/Android.mk
-index eb03c4b..d7be604 100644
+index eb03c4b..0949356 100644
 --- a/Android.mk
 +++ b/Android.mk
 @@ -327,6 +327,7 @@ ifeq ($(TW_INCLUDE_CRYPTO), true)
@@ -10,17 +10,6 @@ index eb03c4b..d7be604 100644
          android.frameworks.stats@1.0 \
          android.security.maintenance-ndk_platform \
          android.system.keystore2-V1-ndk_platform \
-@@ -449,6 +450,10 @@ ifeq ($(TW_FORCE_KEYMASTER_VER), true)
-     LOCAL_CFLAGS += -DTW_FORCE_KEYMASTER_VER
- endif
- 
-+ifeq ($(TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO), true)
-+    LOCAL_CFLAGS += -DTW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
-+endif
-+
- LOCAL_C_INCLUDES += system/vold \
- 
- TWRP_REQUIRED_MODULES += \
 diff --git a/libtar/Android.mk b/libtar/Android.mk
 index c3bb691..8703548 100755
 --- a/libtar/Android.mk
@@ -34,7 +23,7 @@ index c3bb691..8703548 100755
          android.system.keystore2-V1-ndk_platform \
          android.security.authorization-ndk_platform \
 diff --git a/partitionmanager.cpp b/partitionmanager.cpp
-index ca7e232..061fb44 100755
+index ca7e232..7417a64 100755
 --- a/partitionmanager.cpp
 +++ b/partitionmanager.cpp
 @@ -128,6 +128,46 @@ std::vector<users_struct> Users_List;
@@ -62,7 +51,7 @@ index ca7e232..061fb44 100755
 +				false,
 +				fs_type,
 +				"",
-+				extra_fstab);
++			extra_fstab);
 +		_exit(ok ? 0 : 1);
 +	}
 +	int status = 0;
@@ -84,84 +73,7 @@ index ca7e232..061fb44 100755
  TWPartitionManager::TWPartitionManager(void) {
  	mtp_was_enabled = false;
  	mtp_write_fd = -1;
-@@ -237,7 +277,9 @@ void inline Process_Keymaster_Version(TWPartition *ven, bool Display_Error) {
- 		*/
- 	if (version.empty()) {
- 		// unmount partition(s)
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 		if (ven) ven->UnMount(Display_Error);
-+#endif
- 
- 		// Use keymaster_ver prop set from device tree (if exists)
- 		version = android::base::GetProperty(TW_KEYMASTER_VERSION_PROP, version);
-@@ -248,10 +290,14 @@ void inline Process_Keymaster_Version(TWPartition *ven, bool Display_Error) {
- 			LOGINFO("Keymaster_Ver::Unable to find vendor manifest on the device. Setting to default value.\n");
- 		}
- 	} else {
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 		if (ven) ven->UnMount(Display_Error);
-+#endif
- 	}
- #else
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 	if (ven) ven->UnMount(Display_Error);
-+#endif
- 
- 	version = android::base::GetProperty(TW_KEYMASTER_VERSION_PROP, version);
- 	if (version.empty()) {
-@@ -412,7 +458,14 @@ clear:
- 	TWPartition* ven = PartitionManager.Find_Partition_By_Path("/vendor");
- 	TWPartition* odm = PartitionManager.Find_Partition_By_Path("/odm");
- 	if (recovery_mode && !parse_userdata) {
--		if (ven) ven->Mount(Display_Error);
-+		if (ven) {
-+			bool vendor_mounted = ven->Mount(Display_Error);
-+#ifdef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
-+			if (vendor_mounted) {
-+				property_set("twrp.vendor.mounted", "1");
-+			}
-+#endif
-+		}
- 		if (odm) odm->Mount(Display_Error);
- 
- 		Process_ResetProps(ven, odm);
-@@ -439,7 +492,9 @@ clear:
- 
- 	if (odm) odm->UnMount(Display_Error);
- 	Process_Keymaster_Version(ven, false);
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 	if (ven) ven->UnMount(Display_Error);
-+#endif
- 	return true;
- }
- 
-@@ -494,8 +549,10 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
- 			}
- 		}
- 	#ifndef USE_VENDOR_LIBS
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 		if (ven)
- 			ven->UnMount(Display_Error);
-+#endif
- 		if (sys)
- 			sys->UnMount(Display_Error);
- 	#endif
-@@ -539,6 +596,14 @@ void TWPartitionManager::Setup_Fstab_Partitions(bool Display_Error) {
- 			Setup_Settings_Storage_Partition(settings_partition);
- 		}
- 
-+#ifdef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
-+		if (ven && !ven->Is_Mounted()) ven->Mount(Display_Error);
-+		if (ven && ven->Is_Mounted()) {
-+			property_set("twrp.vendor.mounted", "1");
-+		} else {
-+			LOGERR("Unable to mount vendor for crypto HAL services\n");
-+		}
-+#endif
- 	#ifdef TW_INCLUDE_CRYPTO
- 		DataManager::SetValue(TW_IS_ENCRYPTED, 1);
- 		Decrypt_Data();
-@@ -596,7 +661,12 @@ void TWPartitionManager::Decrypt_Data() {
+@@ -596,7 +636,12 @@ void TWPartitionManager::Decrypt_Data() {
  			Set_Crypto_Type("file");
  #ifdef TW_INCLUDE_FBE_METADATA_DECRYPT
  #ifdef USE_FSCRYPT
@@ -175,7 +87,7 @@ index ca7e232..061fb44 100755
  				std::string crypto_blkdev = android::base::GetProperty("ro.crypto.fs_crypto_blkdev", "error");
  				Decrypt_Data->Decrypted_Block_Device = crypto_blkdev;
  				LOGINFO("Successfully decrypted metadata encrypted data partition with new block device: '%s'\n", crypto_blkdev.c_str());
-@@ -2186,7 +2256,7 @@ int TWPartitionManager::Decrypt_Device(string Password, int user_id) {
+@@ -2186,7 +2231,7 @@ int TWPartitionManager::Decrypt_Device(string Password, int user_id) {
  		char cPassword[255];
  		strcpy(cPassword, Password.c_str());
  		int ret = cryptfs_check_passwd(cPassword);
@@ -184,13 +96,3 @@ index ca7e232..061fb44 100755
  	} else {
  		// Parent
  		int status;
-@@ -2388,7 +2458,9 @@ void TWPartitionManager::UnMount_Main_Partitions(void) {
- 
- 	TWPartition *Partition = Find_Partition_By_Path ("/vendor");
- 
-+#ifndef TW_KEEP_VENDOR_MOUNTED_FOR_CRYPTO
- 	if (Partition != NULL) UnMount_By_Path("/vendor", false);
-+#endif
- 	UnMount_By_Path (Get_Android_Root_Path(), true);
- 	Partition = Find_Partition_By_Path ("/product");
- 	if (Partition != NULL) UnMount_By_Path("/product", false);
